@@ -1,11 +1,11 @@
 {
   "name": "sequelize-this",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Enables schema definition via JavaScript Classes among other utility functions",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/eeyang92/sequelize-this.git"
   },
   "scripts": {
     "pre-pub:patch": "npm run _pre-pub -- patch",
