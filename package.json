@@ -1,0 +1,43 @@
+{
+  "name": "sequelize-this",
+  "version": "1.0.0",
+  "description": "Enables schema definition via JavaScript Classes among other utility functions",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "scripts": {
+    "pre-pub:patch": "npm run _pre-pub -- patch",
+    "pre-pub:minor": "npm run _pre-pub -- minor",
+    "pre-pub:major": "npm run _pre-pub -- major",
+    "_pre-pub": "npm run build && npm version -f",
+    "pub": "git push --tags origin master && npm publish",
+    "build": "rm -rf dist/* && ./node_modules/.bin/babel ./src/index.js  > ./dist/index.js"
+  },
+  "author": {
+    "name": "Eric Yang",
+    "email": "eeyang92@gmail.com"
+  },
+  "keywords": [
+    "sequelize",
+    "mysql",
+    "class",
+    "schema",
+    "model",
+    "orm"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "sequelize": "^4.8.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.23.1",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-0": "^6.22.0",
+    "flow-bin": "^0.55.0",
+    "flow-typed": "^2.1.5"
+  }
+}
