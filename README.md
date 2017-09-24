@@ -14,15 +14,16 @@ yarn add sequelize-this
 
 Utility functions for Sequelize
 
-Note: This package was created to assist me in my projects, as such the features included may not be as cohesive as other packages. It was also created with MySQL in mind, but should work for any of the supported dialects. If you have any feature requests or suggestions, feel free to open an issue on the repo.
+Note: This package was created to assist me in my projects, as such the features included may not be as cohesive as other packages. It was also created with MySQL in mind, but should work for any of the supported dialects. If you have any feature requests or suggestions, feel free to open an issue.
 
 ## API
 
 - `classToSequelizeSchema(classInstance, options): function(sequelize): Schema`
-	- Converts a regular Javascript Class instance into a Sequelize Schema **Function**, that can then be used to generate the Sequelize Schema upon initialization
+	- Converts a regular Javascript Class instance into a Sequelize Schema **function**, that can then be used to generate the Sequelize Schema upon initialization
 	- Example (with decorators):
 		```javascript
 		import Sequelize from 'sequelize'
+		import { classToSequelizeSchema, hasMany } from 'sequelize-this'
 
 		@hasMany('Comment')
 		class User {
@@ -34,6 +35,7 @@ Note: This package was created to assist me in my projects, as such the features
 	- Example (without decorators):
 		```javascript
 		import Sequelize from 'sequelize'
+		import { classToSequelizeSchema } from 'sequelize-this'
 
 		class User {
 			name = Sequelize.STRING
