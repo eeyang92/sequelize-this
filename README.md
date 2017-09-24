@@ -56,7 +56,7 @@ Note: This package was created to assist me in my projects, as such the features
 	- Currently does not support subdirectories (TODO)
 	- Allow support for custom filters for model files (TODO)
 	- Will load all .js files in the defined schema directory
-		- Import strategy follows the guideline set in the Sequelize docs: [http://sequelize.readthedocs.io/en/1.7.0/articles/express/]()
+		- Import strategy follows the guideline set in the Sequelize docs: [http://sequelize.readthedocs.io/en/1.7.0/articles/express/](http://sequelize.readthedocs.io/en/1.7.0/articles/express/)
 	- Will set an exportable singleton variable called `connection` that you can import from any file
 	- Returns a promise once all schemas are loaded
 	- Example:
@@ -86,7 +86,7 @@ Note: This package was created to assist me in my projects, as such the features
 		.then(() => sequelize.sync())
 		.then(() => {
 			app.listen(port, () => {
-				console.log(`API Server listening on port ${port}!`)
+				console.log(`Server listening on port ${port}!`)
 			})
 		})
 		```
