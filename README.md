@@ -107,13 +107,13 @@ Note: This package was created to assist me in my projects, as such the features
 - Valid types: `'hasOne', 'hasMany', 'belongsTo', 'belongsToMany'`
 
 ### `hasOne(targetClass, options)`
-- Wrapper for `relationship('hasOne`, targetClass, options)`
+- Wrapper for `relationship('hasOne', targetClass, options)`
 
 ### `hasMany(targetClass, options)`
-- Wrapper for `relationship('hasMany`, targetClass, options)`
+- Wrapper for `relationship('hasMany', targetClass, options)`
 
 ### `belongsTo(targetClass, options)`
-- Wrapper for `relationship('belongsTo`, targetClass, options)`
+- Wrapper for `relationship('belongsTo', targetClass, options)`
 
 ### `belongsToMany(targetClass, options)`
-- Wrapper for `relationship('belongsToMany`, targetClass, options)`
+- Wrapper for `relationship('belongsToMany', targetClass, options)`
