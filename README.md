@@ -18,16 +18,19 @@ Note: This package was created to assist me in my projects, as such the features
 
 ## API
 
-### `classToSequelizeSchema(classInstance, options): function(sequelize): Schema`
+### `classToSequelizeSchema(classInstance, nameOverride, options): function(sequelize): Schema`
 - Converts a regular Javascript Class instance into a Sequelize Schema **function**, that can then be used to generate the Sequelize Schema upon initialization
+- If `nameOverride` is `undefined` (or any equivalent to `false`), then the class name is used
+- `options` is passed into `schema.define`
 - Example (with decorators):
 	```javascript
 	import Sequelize from 'sequelize'
-	import { classToSequelizeSchema, hasMany } from 'sequelize-this'
+	import { classToSequelizeSchema, hasMany, property } from 'sequelize-this'
 
 	@hasMany('Comment')
 	class User {
-		name = Sequelize.STRING
+		@property({ type: Sequelize.STRING })
+		name
 	}
 
 	export default classToSequelizeSchema(new User())
@@ -105,6 +108,7 @@ Note: This package was created to assist me in my projects, as such the features
 ### `relationship(relationshipType, targetClass, options)`
 - Use this to decorate a class to set a relationship
 - Valid types: `'hasOne', 'hasMany', 'belongsTo', 'belongsToMany'`
+- `options` is passed directly to Seqeulize (for associations)
 
 ### `hasOne(targetClass, options)`
 - Wrapper for `relationship('hasOne', targetClass, options)`
@@ -117,3 +121,8 @@ Note: This package was created to assist me in my projects, as such the features
 
 ### `belongsToMany(targetClass, options)`
 - Wrapper for `relationship('belongsToMany', targetClass, options)`
+
+### `property(options)`
+- Define a Sequelize property
+- `options`: 
+	- `type`: Sequelize Type
