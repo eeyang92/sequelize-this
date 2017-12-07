@@ -28,6 +28,10 @@ var _sequelize2 = require('sequelize');
 
 var _sequelize3 = _interopRequireDefault(_sequelize2);
 
+var _lodash = require('lodash.isequal');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -46,63 +50,84 @@ function isAttribute(obj, dialect) {
 	return false;
 }
 
-function extractPropsFromClassInstance(obj, dialect) {
+function extractPropsFromClassDefinition(obj, dialect) {
 	var props = {
 		methods: {},
 		staticMethods: {},
 		attributes: {},
 		staticAttributes: {},
-		relationships: {}
+		relationships: []
 	};
 
 	var usedNames = new Set();
 
+	// if (obj.constructor._sqtMetadata) {
+	// 	if (obj.constructor._sqtMetadata.relationships) {
+	// 		// getNonIntersectingElementsOnFirstArray(obj.constructor._sqtMetadata.relationships, props.relationships)
+	// 		// .forEach((relationship) => {
+	// 		// 	props.relationships.push(relationship)
+	// 		// })
+	// 		props.relationships = obj.constructor._sqtMetadata.relationships
+
+	// 		console.log('propsrel:', props.relationships)
+	// 		// Object.assign(props.relationships, obj.constructor._sqtMetadata.relationships)
+	// 	}
+	// }
+
 	do {
-		var tempStatics = Object.getOwnPropertyNames(obj.constructor).filter(function (value) {
-			return value !== 'length' && value !== 'name' && value !== 'prototype' && !usedNames.has(value);
-		});
+		if (obj.prototype) {
+			var tempStatics = Object.getOwnPropertyNames(obj.prototype.constructor).filter(function (value) {
+				return value !== 'length' && value !== 'name' && value !== 'prototype' && !usedNames.has(value);
+			});
 
-		tempStatics.forEach(function (value) {
-			if (value !== 'modifySchema') {
-				var pValue = obj.constructor[value];
+			tempStatics.forEach(function (value) {
+				if (value !== 'modifySchema') {
+					var pValue = obj.prototype.constructor[value];
 
-				if (typeof pValue === 'function') {
-					props.staticMethods[value] = pValue;
+					if (typeof pValue === 'function') {
+						props.staticMethods[value] = pValue;
+					} else {
+						props.staticAttributes[value] = pValue;
+					}
+
+					usedNames.add(value);
+				}
+			});
+
+			var temp = Object.getOwnPropertyNames(obj.prototype).concat(Object.getOwnPropertySymbols(obj.prototype).map(function (s) {
+				return s.toString();
+			})).filter(function (value, i, arr) {
+				return value !== 'constructor' && value !== 'modifySchema' && value !== 'sequelize' && value !== '_sqtMetadata' && (i == 0 || value !== arr[i - 1]) && !usedNames.has(value);
+			});
+
+			temp.forEach(function (value) {
+				var pValue = obj.prototype[value];
+
+				if (typeof pValue === 'function' && !isAttribute(pValue, dialect)) {
+					props.methods[value] = pValue;
 				} else {
-					props.staticAttributes[value] = pValue;
+					props.attributes[value] = pValue;
 				}
 
 				usedNames.add(value);
-			}
-		});
+			});
 
-		var temp = Object.getOwnPropertyNames(obj).concat(Object.getOwnPropertySymbols(obj).map(function (s) {
-			return s.toString();
-		})).filter(function (value, i, arr) {
-			return value !== 'constructor' && value !== 'modifySchema' && value !== 'sequelize' && value !== '_sqtMetadata' && (i == 0 || value !== arr[i - 1]) && !usedNames.has(value);
-		});
-
-		temp.forEach(function (value) {
-			var pValue = obj[value];
-
-			if (typeof pValue === 'function' && !isAttribute(pValue, dialect)) {
-				props.methods[value] = pValue;
-			} else {
-				props.attributes[value] = pValue;
-			}
-
-			usedNames.add(value);
-		});
-
-		if (obj._sqtMetadata) {
-			if (obj._sqtMetadata.properties) {
-				Object.assign(props.attributes, obj._sqtMetadata.properties);
+			if (obj.prototype._sqtMetadata) {
+				if (obj.prototype._sqtMetadata.properties) {
+					Object.assign(props.attributes, obj.prototype._sqtMetadata.properties);
+				}
 			}
 		}
 
-		if (obj.constructor._sqtMetadata) {
-			if (obj.constructor._sqtMetadata.relationships) {
-				Object.assign(props.relationships, obj.constructor._sqtMetadata.relationships);
+		if (obj._sqtMetadata) {
+			if (obj._sqtMetadata.relationships) {
+				getNonIntersectingElementsOnFirstArray(obj._sqtMetadata.relationships, props.relationships).forEach(function (relationship) {
+					props.relationships.push(relationship);
+				});
+				// props.relationships = obj.constructor._sqtMetadata.relationships
+
+				// console.log('propsrel:', props.relationships)
+				// Object.assign(props.relationships, obj.constructor._sqtMetadata.relationships)
 			}
 		}
 	} while ((obj = Object.getPrototypeOf(obj)) && Object.getPrototypeOf(obj));
@@ -110,26 +135,29 @@ function extractPropsFromClassInstance(obj, dialect) {
 	return props;
 }
 
-function classToSequelizeSchema(classInstance, nameOverride, options) {
+function classToSequelizeSchema(classDefinition, nameOverride, options) {
 	return function (sequelize) {
-		var props = extractPropsFromClassInstance(classInstance, sequelize.getDialect());
+		var props = extractPropsFromClassDefinition(classDefinition, sequelize.getDialect());
 
-		var schema = sequelize.define(nameOverride ? nameOverride : classInstance.constructor.name, props.attributes, options);
+		var schema = sequelize.define(nameOverride ? nameOverride : classDefinition.name, props.attributes, options);
 
 		if (props.relationships) {
 			schema.associate = function (_sequelize) {
-				for (var key in props.relationships) {
-					if (props.relationships.hasOwnProperty(key)) {
-						var _relationship = props.relationships[key];
+				props.relationships.forEach(function (relationship) {
+					setRelationship(schema, relationship.relationshipType, _sequelize.models[relationship.targetClass], relationship.options, relationship.overrideOptions);
+				});
+				// for (const key in props.relationships) {
+				// 	if (props.relationships.hasOwnProperty(key)) {
+				// 		const relationship = props.relationships[key]
 
-						setRelationship(schema, _relationship.relationshipType, _sequelize.models[_relationship.targetClass], _relationship.options);
-					}
-				}
+				// 		setRelationship(schema, relationship.relationshipType, _sequelize.models[relationship.targetClass], relationship.options)
+				// 	}
+				// }
 			};
 		}
 
-		if (classInstance.constructor.modifySchema) {
-			schema.modifySchema = classInstance.constructor.modifySchema(schema);
+		if (classDefinition.modifySchema) {
+			schema.modifySchema = classDefinition.modifySchema(schema);
 		}
 
 		Object.assign(schema, props.staticMethods);
@@ -153,6 +181,44 @@ function getConnection() {
 	}
 }
 
+function importFiles(sequelize_, schemaDir_) {
+	// Note: Not tested against symlinks, avoid infinite loops?
+	var db = {};
+	var filesToImport = [];
+	var directoriesToScan = [schemaDir_];
+
+	var _loop = function _loop() {
+		var directory = directoriesToScan.pop();
+
+		_fs2.default.readdirSync(directory).forEach(function (file) {
+			var absolutePath = _path2.default.join(directory, file);
+			var stats = _fs2.default.statSync(absolutePath);
+
+			if (stats.isDirectory()) {
+				directoriesToScan.push(absolutePath);
+			} else {
+				filesToImport.push(absolutePath);
+			}
+		});
+	};
+
+	while (directoriesToScan.length > 0) {
+		_loop();
+	}
+
+	filesToImport.filter(function (file) {
+		var filename = file.split(/\/|\\/).pop();
+
+		return filename.indexOf('.') !== 0 && filename.split('.').pop() === 'js';
+	}).forEach(function (file) {
+		var model = sequelize_.import(file);
+
+		db[model.name] = model;
+	});
+
+	return db;
+}
+
 function initializeSequelize(sequelize, schemaDir) {
 	if (!schemaDir) {
 		throw Error('Need a schema dir!');
@@ -163,15 +229,19 @@ function initializeSequelize(sequelize, schemaDir) {
 	connectionPromise = sequelize.authenticate().then(function () {
 		console.log('--> connection to ' + sequelize.getDialect() + ' database established');
 
-		var db = {};
+		// const db = {}
 
-		_fs2.default.readdirSync(schemaDir).filter(function (file) {
-			return file.indexOf('.') !== 0 && file.split('.').pop() === 'js';
-		}).forEach(function (file) {
-			var model = sequelize.import(_path2.default.join(schemaDir, file));
+		// fs.readdirSync(schemaDir)
+		// .filter((file) => {
+		// 	return (file.indexOf('.') !== 0) && (file.split('.').pop() === 'js')
+		// })
+		// .forEach((file) => {
+		// 	const model = sequelize.import(path.join(schemaDir, file))
 
-			db[model.name] = model;
-		});
+		// 	db[model.name] = model
+		// })
+
+		var db = importFiles(sequelize, schemaDir);
 
 		Object.keys(db).forEach(function (modelName) {
 			if (db[modelName].hasOwnProperty('modifySchema')) {
@@ -197,15 +267,35 @@ function initializeSequelize(sequelize, schemaDir) {
 
 var validRelationshipTypes = ['hasOne', 'hasMany', 'belongsTo', 'belongsToMany'];
 
-function setRelationship(schema, relationshipType, model, options) {
+function setRelationship(schema, relationshipType, model, options, overrideOptions) {
+	var newOptions = options ? Object.assign({}, options) : {};
+
+	if (overrideOptions) {
+		Object.keys(overrideOptions).forEach(function (key) {
+			newOptions[key] = overrideOptions[key](schema);
+		});
+	}
+
 	if (validRelationshipTypes.includes(relationshipType)) {
-		schema[relationshipType](model, options);
+		schema[relationshipType](model, newOptions);
 	} else {
 		throw Error('Invalid relationship type');
 	}
 }
 
-function relationship(relationshipType, targetClass, options) {
+function getNonIntersectingElementsOnFirstArray(array1, array2) {
+	return array1.filter(function (element1) {
+		if (array2.length === 0) {
+			return true;
+		}
+
+		return array2.some(function (element2) {
+			return !(0, _lodash2.default)(element2, element1);
+		});
+	});
+}
+
+function relationship(relationshipType, targetClass, options, overrideOptions) {
 	if (!relationshipType) {
 		throw Error('Relationship Type must be defined');
 	}
@@ -218,48 +308,67 @@ function relationship(relationshipType, targetClass, options) {
 		throw Error('Target Class must be defined');
 	}
 
-	var name = targetClass;
-
-	if (options) {
-		if (options.foreignKey) {
-			name = options.foreignKey;
-		}
-	}
-
 	return function (target) {
 		// Note: This is a workaround due to a similar bug described here:
 		// https://stackoverflow.com/questions/43912168/typescript-decorators-with-inheritance
+
+		// let name = targetClass
+
+		// if (options) {
+		// 	if (options.foreignKey) {
+		// 		name = options.foreignKey
+		// 	}
+
+		// 	if (options.as) {
+		// 		name = options.as
+		// 	}
+		// }
 
 		if (!Object.getOwnPropertyDescriptor(target, '_sqtMetadata')) {
 			target._sqtMetadata = {};
 		}
 
 		if (target._sqtMetadata.relationships) {
-			target._sqtMetadata.relationships[name] = {
+			target._sqtMetadata.relationships.push({
 				relationshipType: relationshipType,
 				targetClass: targetClass,
-				options: options
-			};
-		} else {
-			target._sqtMetadata.relationships = _defineProperty({}, name, {
-				relationshipType: relationshipType,
-				targetClass: targetClass,
-				options: options
+				options: options,
+				overrideOptions: overrideOptions
 			});
+		} else {
+			target._sqtMetadata.relationships = [{
+				relationshipType: relationshipType,
+				targetClass: targetClass,
+				options: options,
+				overrideOptions: overrideOptions
+			}];
 		}
 
-		var parentTarget = Object.getPrototypeOf(target);
-		var parentData = parentTarget._sqtMetadata;
+		// Note: This part is not needed as extractPropsFromClassDefinition
+		// will walk through the parent
 
-		if (parentData) {
-			if (parentData.relationships) {
-				Object.keys(parentData.relationships).forEach(function (key) {
-					if (!target._sqtMetadata.relationships[key]) {
-						target._sqtMetadata.relationships[key] = parentData.relationships[key];
-					}
-				});
-			}
-		}
+		// const parentTarget = Object.getPrototypeOf(target)
+		// const parentData = parentTarget._sqtMetadata
+
+		// if (parentData) {
+		// 	if (parentData.relationships) {
+		// 		getNonIntersectingElementsOnFirstArray(parentData.relationships, target._sqtMetadata.relationships)
+		// 		// parentData.relationships.filter((parentRelationship) => {
+		// 		// 	return target._sqtMetadata.relationships.some((relationship) => {
+		// 		// 		return !isEqual(relationship, parentRelationship)
+		// 		// 	})
+		// 		// })
+		// 		.forEach((relationship) => {
+		// 			target._sqtMetadata.relationships.push(relationship)
+		// 		})
+
+		// 		// Object.keys(parentData.relationships).forEach((key) => {
+		// 		// 	if (!target._sqtMetadata.relationships[key]) {
+		// 		// 		target._sqtMetadata.relationships[key] = parentData.relationships[key]
+		// 		// 	}
+		// 		// })
+		// 	}
+		// }
 
 		// if (target._sqtMetadata) {
 		// 	if (target._sqtMetadata.relationships) {
@@ -315,20 +424,20 @@ function relationship(relationshipType, targetClass, options) {
 // 	}
 // }
 
-function hasOne(targetClass, options) {
-	return relationship('hasOne', targetClass, options);
+function hasOne(targetClass, options, overrideOptions) {
+	return relationship('hasOne', targetClass, options, overrideOptions);
 }
 
-function hasMany(targetClass, options) {
-	return relationship('hasMany', targetClass, options);
+function hasMany(targetClass, options, overrideOptions) {
+	return relationship('hasMany', targetClass, options, overrideOptions);
 }
 
-function belongsTo(targetClass, options) {
-	return relationship('belongsTo', targetClass, options);
+function belongsTo(targetClass, options, overrideOptions) {
+	return relationship('belongsTo', targetClass, options, overrideOptions);
 }
 
-function belongsToMany(targetClass, options) {
-	return relationship('belongsToMany', targetClass, options);
+function belongsToMany(targetClass, options, overrideOptions) {
+	return relationship('belongsToMany', targetClass, options, overrideOptions);
 }
 
 function camelCase(string) {
@@ -370,25 +479,6 @@ function property(options) {
 				});
 			}
 		}
-		// console.log(target)
-
-		// // if (target.hasOwnProperty('_sqtMetaData')) {
-		// // 	console.log('has sqt!')
-		// // }
-
-		// if (target.constructor._sqtMetadata) {
-		// 	if (target.constructor._sqtMetadata.properties) {
-		// 		target.constructor._sqtMetadata.properties[name] = options.type
-		// 	} else {
-		// 		target.constructor._sqtMetadata.properties = { [name]: options.type }
-		// 	}
-		// } else {
-		// 	target.constructor._sqtMetadata = {
-		// 		properties: {
-		// 			[name]: options.type
-		// 		}
-		// 	}
-		// }
 	};
 }
 
