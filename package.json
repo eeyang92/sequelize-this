@@ -2,7 +2,7 @@
   "name": "sequelize-this",
   "version": "2.0.0",
   "description": "Enables schema definition via JavaScript Classes among other utility functions",
-  "main": "dist/index.js",
+  "main": "dist/index.bundle.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/eeyang92/sequelize-this.git"
@@ -13,7 +13,8 @@
     "pre-pub:major": "npm run _pre-pub -- major",
     "_pre-pub": "npm run build && npm version -f",
     "pub": "git push --tags origin master && npm publish",
-    "build": "rm -rf dist/* && ./node_modules/.bin/babel ./src/index.js  > ./dist/index.js"
+    "clear-dist": "rm -rf dist/*",
+    "build": "npm run clear-dist; NODE_ENV=production node -r babel-register node_modules/.bin/webpack --config webpack.config.prod.module.js -p --progress --profile --colors"
   },
   "author": {
     "name": "Eric Yang",
@@ -32,13 +33,19 @@
     "sequelize": "^4.8.0"
   },
   "devDependencies": {
+    "@types/sequelize": "^4.0.79",
     "babel-cli": "^6.24.1",
     "babel-core": "^6.23.1",
-    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-loader": "^7.1.2",
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-stage-0": "^6.22.0",
-    "flow-bin": "^0.55.0",
-    "flow-typed": "^2.1.5"
+    "babel-register": "^6.26.0",
+    "ts-loader": "^3.2.0",
+    "typescript": "^2.6.2",
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.9.7",
+    "webpack-merge": "^4.1.1",
+    "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
     "lodash.isequal": "^4.5.0"

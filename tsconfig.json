@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "outDir": "./dist",
+        "experimentalDecorators": true,
+        "lib": [
+            "es7"
+        ],
+        "listFiles": true,
+        "pretty": true
+        //"allowSyntheticDefaultImports": true
+    }
+}
