@@ -187,7 +187,7 @@ function importFiles(sequelize_: Sequelize.Sequelize, schemaDir_: string) { // N
 	return db
 }
 
-export function initializeSequelize(sequelize: Sequelize.Sequelize, schemaDir: string) {
+export function initializeSequelize(sequelize: Sequelize.Sequelize, schemaDir: string): PromiseLike<Sequelize.Sequelize> {
 	if (!schemaDir) {
 		throw Error('Need a schema dir!')
 	}
@@ -215,7 +215,7 @@ export function initializeSequelize(sequelize: Sequelize.Sequelize, schemaDir: s
 
 		console.log(`--> ${ sequelize.getDialect() } models loaded`)
 
-		return
+		return sequelize
 	})
 	.catch(err => {
 		console.error('Unable to connect to the database:', err)

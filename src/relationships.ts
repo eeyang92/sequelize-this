@@ -2,7 +2,7 @@ import * as Sequelize from 'sequelize'
 
 const validRelationshipTypes = ['hasOne', 'hasMany', 'belongsTo', 'belongsToMany']
 
-export function setRelationship(schema: Sequelize.Model<any, any>, relationshipType: string, model, options: Sequelize.Options, overrideOptions) {
+export function setRelationship(schema: Sequelize.Model<any, any>, relationshipType: string, model: Sequelize.Model<any, any>, options: Sequelize.AssociationOptions, overrideOptions) {
 	const newOptions = (options) ? Object.assign({}, options) : {}
 
 	if (overrideOptions) {
@@ -18,7 +18,7 @@ export function setRelationship(schema: Sequelize.Model<any, any>, relationshipT
 	}
 }
 
-export function relationship(relationshipType: string, targetClass: string, options, overrideOptions) {
+export function relationship(relationshipType: string, targetClass: string, options: Sequelize.AssociationOptions, overrideOptions) {
 	if (!relationshipType) {
 		throw Error('Relationship Type must be defined')
 	}

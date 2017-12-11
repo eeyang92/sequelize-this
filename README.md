@@ -10,6 +10,12 @@ or
 yarn add sequelize-this
 ```
 
+The latest beta build
+
+```sh
+yarn add sequelize-this@beta
+```
+
 ## Purpose of this Package
 
 Utility functions for Sequelize
@@ -18,7 +24,7 @@ Note: This package was created to assist me in my projects, as such the features
 
 ## API
 
-### `classToSequelizeSchema(classInstance, nameOverride, options): function(sequelize): Schema`
+### `classToSequelizeSchema(classDefinition, options: Sequelize.Options, sqtOptions: SqtOptions): function(sequelize: Sequelize): Sequelize.Model`
 - Converts a regular Javascript Class instance into a Sequelize Schema **function**, that can then be used to generate the Sequelize Schema upon initialization
 - If `nameOverride` is `undefined` (or any equivalent to `false`), then the class name is used
 - `options` is passed into `schema.define`
@@ -54,11 +60,11 @@ Note: This package was created to assist me in my projects, as such the features
 	export default classToSequelizeSchema(new User())
 	```
 - Note: Instead of a method called `associate` there is a method called `modifySchema`, since you can do anything to the schema object in this method. This is relevant if you wish to initialize Sequelize yourself, instead of using the provided `initializeSequelize` function
+	- In fact, a method called `associate` is indeed created behind the scenes, but this may change in the future
 
-### `initializeSequelize(sequelize, schemaDir): Promise`
-- Currently does not support subdirectories (TODO)
+### `initializeSequelize(sequelize: Sequelize, schemaDir: string): Promise<Sequelize.Sequelize>`
 - Allow support for custom filters for model files (TODO)
-- Will load all .js files in the defined schema directory
+- Will load all .js files in the defined schema directory (and subdirectories)
 	- Import strategy follows the guideline set in the Sequelize docs: [http://sequelize.readthedocs.io/en/1.7.0/articles/express/](http://sequelize.readthedocs.io/en/1.7.0/articles/express/)
 - Will set an exportable singleton variable called `connection` that you can import from any file
 - Returns a promise once all schemas are loaded
@@ -89,40 +95,49 @@ Note: This package was created to assist me in my projects, as such the features
 	.then(() => sequelize.sync())
 	.then(() => {
 		app.listen(port, () => {
-			console.log(`Server listening on port ${port}!`)
+			console.log(`Server listening on port ${ port }!`)
 		})
 	})
 	```
 
-### `setConnection(sequelize)`
+### `setConnection(sequelize: Sequelize)`
 - If you wish to initialize Sequelize yourself instead of using `initializeSequelize`, but still want to use the singleton pattern, you can set the `connection` variable using this method and use `connection` normally
 
-### `getConnection(): Promise(connection)`
+### `getConnection(): Promise<Sequelize>`
 - Returns when all schemas are loaded and `connection` is set
 - Throws an error if `initializeSequelize` was never run
 
-### `connection`
+### `connection: Sequelize`
 - Singleton variable holding the sequelize instance
 - Use this to retrieve the value synchronously if you know `connection` will be set by the time this variable is used
 
-### `relationship(relationshipType, targetClass, options)`
+### `relationship(relationshipType: string, targetClass: string, options: Sequelize.AssociationOptions)`
 - Use this to decorate a class to set a relationship
 - Valid types: `'hasOne', 'hasMany', 'belongsTo', 'belongsToMany'`
 - `options` is passed directly to Seqeulize (for associations)
 
-### `hasOne(targetClass, options)`
+### `hasOne(targetClass: string, options: Sequelize.AssociationOptions)`
 - Wrapper for `relationship('hasOne', targetClass, options)`
 
-### `hasMany(targetClass, options)`
+### `hasMany(targetClass: string, options: Sequelize.AssociationOptions)`
 - Wrapper for `relationship('hasMany', targetClass, options)`
 
-### `belongsTo(targetClass, options)`
+### `belongsTo(targetClass: string, options: Sequelize.AssociationOptions)`
 - Wrapper for `relationship('belongsTo', targetClass, options)`
 
-### `belongsToMany(targetClass, options)`
+### `belongsToMany(targetClass: string, options: Sequelize.AssociationOptions)`
 - Wrapper for `relationship('belongsToMany', targetClass, options)`
 
-### `property(options)`
+### `property(options: PropertyOptions)`
 - Define a Sequelize property
-- `options`: 
-	- `type`: Sequelize Type
+
+### PropertyOptions
+- `type`: `Sequelize.DataTypes` (Required)
+
+
+## Changes
+
+Version 3.0.0:
+- Ported to TypeScript
+- Better documentation
+- Several breaking changed in API, including the way options are passed in
