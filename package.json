@@ -1,8 +1,8 @@
 {
   "name": "sequelize-this",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Enables schema definition via JavaScript Classes among other utility functions",
-  "main": "dist/index.bundle.js",
+  "main": "dist",
   "repository": {
     "type": "git",
     "url": "https://github.com/eeyang92/sequelize-this.git"
