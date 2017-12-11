@@ -1,6 +1,6 @@
 {
   "name": "sequelize-this",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Enables schema definition via JavaScript Classes among other utility functions",
   "main": "index.js",
   "repository": {
@@ -8,15 +8,15 @@
     "url": "https://github.com/eeyang92/sequelize-this.git"
   },
   "scripts": {
-    "pre-pub:patch": "npm run _pre-pub -- patch",
-    "pre-pub:minor": "npm run _pre-pub -- minor",
-    "pre-pub:major": "npm run _pre-pub -- major",
+    "pre-pub:patch": "npm run _pre-pub -- patch && npm run copy",
+    "pre-pub:minor": "npm run _pre-pub -- minor && npm run copy",
+    "pre-pub:major": "npm run _pre-pub -- major && npm run copy",
     "_pre-pub": "npm run build && npm version -f",
     "pub:latest": "git push --tags origin master && cd dist && npm publish",
     "pub:beta": "git push --tags origin beta && cd dist && npm publish --tag beta",
     "clear-dist": "rm -rf dist/*",
     "build": "npm run clear-dist; npm run copy; NODE_ENV=production node -r babel-register node_modules/.bin/webpack --config webpack.config.prod.module.js -p --progress --profile --colors",
-    "copy": "cp package.json README.md LICENSE dist"
+    "copy": "cp -rf package.json README.md LICENSE dist"
   },
   "author": {
     "name": "Eric Yang",
