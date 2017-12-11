@@ -31,7 +31,7 @@ Note: This package was created to assist me in my projects, as such the features
 - If `nameOverride` is `undefined` (or any equivalent to `false`), then the class name is used
 - `options` is passed into `schema.define`
 - Example (with decorators):
-	```javascript
+	```typescript
 	import Sequelize from 'sequelize'
 	import { classToSequelizeSchema, property } from 'sequelize-this'
 	import { hasMany } from 'sequelize-this/relationships
