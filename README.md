@@ -39,7 +39,7 @@ Note: This package was created to assist me in my projects, as such the features
 		name
 	}
 
-	export default classToSequelizeSchema(new User())
+	export default classToSequelizeSchema(User)
 	```
 - Example (without decorators):
 	```javascript
@@ -57,10 +57,13 @@ Note: This package was created to assist me in my projects, as such the features
 
 	}
 
-	export default classToSequelizeSchema(new User())
+	export default classToSequelizeSchema(User)
 	```
 - Note: Instead of a method called `associate` there is a method called `modifySchema`, since you can do anything to the schema object in this method. This is relevant if you wish to initialize Sequelize yourself, instead of using the provided `initializeSequelize` function
 	- In fact, a method called `associate` is indeed created behind the scenes, but this may change in the future
+
+### `SqtOptions`
+- `nameOverride`: `string`
 
 ### `initializeSequelize(sequelize: Sequelize, schemaDir: string): Promise<Sequelize.Sequelize>`
 - Allow support for custom filters for model files (TODO)
@@ -131,7 +134,7 @@ Note: This package was created to assist me in my projects, as such the features
 ### `property(options: PropertyOptions)`
 - Define a Sequelize property
 
-### PropertyOptions
+### `PropertyOptions`
 - `type`: `Sequelize.DataTypes` (Required)
 
 
