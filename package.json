@@ -12,10 +12,11 @@
     "pre-pub:minor": "npm run _pre-pub -- minor",
     "pre-pub:major": "npm run _pre-pub -- major",
     "_pre-pub": "npm run build && npm version -f",
-    "pub:latest": "git push --tags origin master && npm publish",
-    "pub:beta": "git push --tags origin beta && npm publish --tag beta",
+    "pub:latest": "git push --tags origin master && cd dist && npm publish",
+    "pub:beta": "git push --tags origin beta && cd dist && npm publish --tag beta",
     "clear-dist": "rm -rf dist/*",
-    "build": "npm run clear-dist; NODE_ENV=production node -r babel-register node_modules/.bin/webpack --config webpack.config.prod.module.js -p --progress --profile --colors"
+    "build": "npm run clear-dist; npm run copy; NODE_ENV=production node -r babel-register node_modules/.bin/webpack --config webpack.config.prod.module.js -p --progress --profile --colors",
+    "copy": "cp package.json README.md LICENSE dist"
   },
   "author": {
     "name": "Eric Yang",
