@@ -16,11 +16,12 @@ const publicPath = '/'
 export default {
 	devtool: 'inline-source-map',
 	entry: {
-		index: path.join(__dirname, 'src', 'index.ts')
+		index: path.join(__dirname, 'src', 'index.ts'),
+		relationships: path.join(__dirname, 'src', 'relationships.ts'),
 	},
 	output: {
 		path: outputPath,
-		filename: '[name].bundle.js',
+		filename: '[name].js',
 		publicPath
 	},
 	module: {
@@ -32,16 +33,16 @@ export default {
 			{
 				test: /\.json$/,
 				use: ['json-loader']
-			},
-			{
-				test: /\.css$/,
-				use: ['style-loader', 'css-loader?modules']
 			}
 		]
 	},
 	resolve: {
 		alias,
-		extensions: ['.ts', '.tsx', '.js']
+		extensions: ['.ts', '.tsx', '.js'],
+		modules: [
+			path.resolve('./src'),
+			path.resolve('./src/Relationships')
+		]
 	},
 	plugins: [
 		new webpack.DefinePlugin({
