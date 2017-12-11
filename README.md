@@ -24,6 +24,8 @@ Note: This package was created to assist me in my projects, as such the features
 
 ## API
 
+## `sequelize-this`
+
 ### `classToSequelizeSchema(classDefinition, options: Sequelize.Options, sqtOptions: SqtOptions): function(sequelize: Sequelize): Sequelize.Model`
 - Converts a regular Javascript Class instance into a Sequelize Schema **function**, that can then be used to generate the Sequelize Schema upon initialization
 - If `nameOverride` is `undefined` (or any equivalent to `false`), then the class name is used
@@ -31,7 +33,8 @@ Note: This package was created to assist me in my projects, as such the features
 - Example (with decorators):
 	```javascript
 	import Sequelize from 'sequelize'
-	import { classToSequelizeSchema, hasMany, property } from 'sequelize-this'
+	import { classToSequelizeSchema, property } from 'sequelize-this'
+	import { hasMany } from 'sequelize-this/relationships
 
 	@hasMany('Comment')
 	class User {
@@ -113,6 +116,12 @@ Note: This package was created to assist me in my projects, as such the features
 ### `connection: Sequelize`
 - Singleton variable holding the sequelize instance
 - Use this to retrieve the value synchronously if you know `connection` will be set by the time this variable is used
+
+### `relationships`
+
+- Exports object `relationships`; see below for relationships API
+
+## `sequelize-this/relationships`
 
 ### `relationship(relationshipType: string, targetClass: string, options: Sequelize.AssociationOptions)`
 - Use this to decorate a class to set a relationship

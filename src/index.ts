@@ -3,9 +3,9 @@ import * as path from 'path'
 import * as Sequelize from 'sequelize'
 import * as isEqual from 'lodash.isequal'
 
-import { setRelationship } from './relationships'
+import relationships, { setRelationship } from './relationships'
 
-// export { relationships }
+export { relationships }
 
 export var connection: Sequelize.Sequelize | null = null
 
