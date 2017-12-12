@@ -73,7 +73,7 @@ Note: This package was created to assist me in my projects, as such the features
 ### `SqtOptions`
 - `nameOverride`: `string`
 
-### `initializeSequelize(sequelize: Sequelize, schemaDir: string, , options: InitializeSequelizeOptions = {}): Promise<Sequelize.Sequelize>`
+### `initializeSequelize(sequelize: Sequelize, schemaDir: string, options: InitializeSequelizeOptions = {}): Promise<Sequelize.Sequelize>`
 - Allow support for custom filters for model files (TODO)
 - Will load all .js files in the defined schema directory (and subdirectories)
 	- Import strategy follows the guideline set in the Sequelize docs: [http://sequelize.readthedocs.io/en/1.7.0/articles/express/](http://sequelize.readthedocs.io/en/1.7.0/articles/express/)
