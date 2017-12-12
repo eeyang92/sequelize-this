@@ -16,6 +16,15 @@ The latest beta build
 yarn add sequelize-this@beta
 ```
 
+Test
+
+```sh
+npm install sequelize
+npm run test
+```
+
+- Note: `sequelize` is listed a peer dependency, which may not be installed automatically
+
 ## Purpose of this Package
 
 Utility functions for Sequelize
@@ -26,49 +35,45 @@ Note: This package was created to assist me in my projects, as such the features
 
 ## `sequelize-this`
 
-### `classToSequelizeSchema(classDefinition, options: Sequelize.Options, sqtOptions: SqtOptions): function(sequelize: Sequelize): Sequelize.Model`
+### `classToSequelizeSchema(classDefinition, options: Sequelize.DefineOptions<any> = {}, sqtOptions: SqtOptions = {}): function(sequelize: Sequelize): Sequelize.Model`
 - Converts a regular Javascript Class instance into a Sequelize Schema **function**, that can then be used to generate the Sequelize Schema upon initialization
 - If `nameOverride` is `undefined` (or any equivalent to `false`), then the class name is used
 - `options` is passed into `schema.define`
-- Example (with decorators):
-	```typescript
+- Known Issue: instance/class methods must be defined as a method, and not as a property on a class (as shown below)
+- Example:
+	```javascript
 	import Sequelize from 'sequelize'
 	import { classToSequelizeSchema, property } from 'sequelize-this'
-	import { hasMany } from 'sequelize-this/relationships
+	import { hasMany } from 'sequelize-this/relationships'
 
 	@hasMany('Comment')
 	class User {
 		@property({ type: Sequelize.STRING })
 		name
-	}
 
-	export default classToSequelizeSchema(User)
-	```
-- Example (without decorators):
-	```javascript
-	import Sequelize from 'sequelize'
-	import { classToSequelizeSchema } from 'sequelize-this'
-
-	class User {
-		name = Sequelize.STRING
-
-		static modifySchema(schema) {
-			return (sequelize) => {
-				schema.hasMany(sequelize.models.Comment)
-			}
+		doSomethingWithUser() {
+			...
 		}
-
 	}
 
 	export default classToSequelizeSchema(User)
 	```
-- Note: Instead of a method called `associate` there is a method called `modifySchema`, since you can do anything to the schema object in this method. This is relevant if you wish to initialize Sequelize yourself, instead of using the provided `initializeSequelize` function
+- Note: Support for usage without decorators is no longer provided
+- Note: Instead of a method called `associate`, you can define a static method called `modifySchema`, since you can do anything to the schema object in this method. This is relevant if you wish to initialize Sequelize yourself, instead of using the provided `initializeSequelize` function
+	- Format of `modifySchema` method:
+		- ```javascript
+			static modifySchema(schema) {
+				return (sequelize) => {
+					schema.hasMany(sequelize.models.Comment)
+				}
+			}
+		```
 	- In fact, a method called `associate` is indeed created behind the scenes, but this may change in the future
 
 ### `SqtOptions`
 - `nameOverride`: `string`
 
-### `initializeSequelize(sequelize: Sequelize, schemaDir: string): Promise<Sequelize.Sequelize>`
+### `initializeSequelize(sequelize: Sequelize, schemaDir: string, , options: InitializeSequelizeOptions = {}): Promise<Sequelize.Sequelize>`
 - Allow support for custom filters for model files (TODO)
 - Will load all .js files in the defined schema directory (and subdirectories)
 	- Import strategy follows the guideline set in the Sequelize docs: [http://sequelize.readthedocs.io/en/1.7.0/articles/express/](http://sequelize.readthedocs.io/en/1.7.0/articles/express/)
@@ -105,6 +110,9 @@ Note: This package was created to assist me in my projects, as such the features
 		})
 	})
 	```
+
+### `InitializeSequelizeOptions`
+- `silent`: `boolean`
 
 ### `setConnection(sequelize: Sequelize)`
 - If you wish to initialize Sequelize yourself instead of using `initializeSequelize`, but still want to use the singleton pattern, you can set the `connection` variable using this method and use `connection` normally
@@ -146,8 +154,13 @@ Note: This package was created to assist me in my projects, as such the features
 ### `PropertyOptions`
 - `type`: `Sequelize.DataTypes` (Required)
 
-
 ## Changes
+
+Version 3.1.0
+- Fixed the way methods were attached to the schema object
+- Included basic test suite (WIP)
+- Fixed some option types
+- Added SQT-specific options (i.e. silence output)
 
 Version 3.0.0:
 - Ported to TypeScript

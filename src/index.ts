@@ -69,8 +69,7 @@ function extractPropsFromClassDefinition(obj) {
 			temp.forEach((value) => {
 				const pValue = obj.prototype[value]
 	
-				if (typeof pValue === 'function'
-				) {
+				if (typeof pValue === 'function') {
 					props.methods[value] = pValue
 				} else {
 					props.attributes[value] = pValue
@@ -101,17 +100,22 @@ function extractPropsFromClassDefinition(obj) {
 	return props
 }
 
-export function classToSequelizeSchema(classDefinition: Object['constructor'], options: Sequelize.Options, sqtOptions: SqtOptions = {}) {
+export function classToSequelizeSchema(classDefinition: Object['constructor'], options: Sequelize.DefineOptions<any> = {}, sqtOptions: SqtOptions = {}) {
 	return function(sequelize: Sequelize.Sequelize) {
 		const props = extractPropsFromClassDefinition(classDefinition)
+
+		const newOptions = Object.assign({}, options)
+
+		newOptions['instanceMethods'] = Object.assign({}, newOptions.instanceMethods, props.methods)
+		newOptions['classMethods'] = Object.assign({}, newOptions.classMethods, props.staticMethods)
 
 		const schema = sequelize.define(
 			(sqtOptions.nameOverride) ? sqtOptions.nameOverride : classDefinition.name,
 			props.attributes,
-			options
+			newOptions
 		)
 
-		if (props.relationships) {
+		if (props.relationships && props.relationships.length > 0) {
 			schema['associate'] = (_sequelize) => {
 				props.relationships.forEach((relationship: any) => {
 					setRelationship(schema, relationship.relationshipType, _sequelize.models[relationship.targetClass], relationship.options, relationship.overrideOptions)
@@ -122,9 +126,6 @@ export function classToSequelizeSchema(classDefinition: Object['constructor'], o
 		if (classDefinition['modifySchema']) {
 			schema['modifySchema'] = classDefinition['modifySchema'](schema)
 		}
-
-		Object.assign(schema, props.staticMethods)
-		Object.assign(schema['prototype'], props.methods)
 
 		return schema
 	}
@@ -187,18 +188,25 @@ function importFiles(sequelize_: Sequelize.Sequelize, schemaDir_: string) { // N
 	return db
 }
 
-export function initializeSequelize(sequelize: Sequelize.Sequelize, schemaDir: string): PromiseLike<Sequelize.Sequelize> {
+interface InitializeSequelizeOptions {
+	silent?: boolean
+}
+
+export function initializeSequelize(sequelize: Sequelize.Sequelize, schemaDir: string, options: InitializeSequelizeOptions = {}): PromiseLike<Sequelize.Sequelize> {
 	if (!schemaDir) {
 		throw Error('Need a schema dir!')
 	}
 
-	console.log('Initializing connection...')
+	if (!options.silent) {
+		console.log('Initializing connection...')
+	}
 
 	connectionPromise = sequelize
 	.authenticate()
 	.then(() => {
-		console.log(`--> connection to ${ sequelize.getDialect() } database established`)
-
+		if (!options.silent) {
+			console.log(`--> connection to ${ sequelize.getDialect() } database established`)
+		}
 		const db = importFiles(sequelize, schemaDir)
 
 		Object.keys(db).forEach((modelName) => {
@@ -213,12 +221,18 @@ export function initializeSequelize(sequelize: Sequelize.Sequelize, schemaDir: s
 
 		connection = sequelize
 
-		console.log(`--> ${ sequelize.getDialect() } models loaded`)
+		if (!options.silent) {
+			console.log(`--> ${ sequelize.getDialect() } models loaded`)
+		}
 
 		return sequelize
 	})
 	.catch(err => {
-		console.error('Unable to connect to the database:', err)
+		if (!options.silent) {
+			console.error('Unable to connect to the database:', err)
+		}
+
+		throw (err)
 	})
 
 	return connectionPromise
@@ -236,18 +250,14 @@ function getNonIntersectingElementsOnFirstArray(array1: Array<any>, array2: Arra
 	})
 }
 
-interface PropertyOptions {
-	type: Sequelize.DataTypes
-}
-
-export function property(options: PropertyOptions) {
-	if (!options) {
-		throw Error('Options must be defined')
+export function property(defineAttribute: Sequelize.DefineAttributes) {
+	if (!defineAttribute) {
+		throw Error('defineAttribute must be defined')
 	}
 
-	if (!options.type) {
-		throw Error('Sequelize type must be defined')
-	}
+	// if (!defineAttribute.type) {
+	// 	throw Error('Sequelize type must be defined')
+	// }
 
 	return (target, name) => {
 		// Note: This is a workaround due to a similar bug described here:
@@ -258,9 +268,9 @@ export function property(options: PropertyOptions) {
 		}
 
 		if (target._sqtMetadata.properties) {
-			target._sqtMetadata.properties[name] = options.type
+			target._sqtMetadata.properties[name] = defineAttribute
 		} else {
-			target._sqtMetadata.properties = { [name]: options.type }
+			target._sqtMetadata.properties = { [name]: defineAttribute }
 		}
 
 		const parentTarget = Object.getPrototypeOf(target)

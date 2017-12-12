@@ -16,7 +16,8 @@
     "pub:beta": "git push --tags origin beta && cd dist && npm publish --tag beta",
     "clear-dist": "rm -rf dist/*",
     "build": "npm run clear-dist; npm run copy; NODE_ENV=production node -r babel-register node_modules/.bin/webpack --config webpack.config.prod.module.js -p --progress --profile --colors",
-    "copy": "cp -rf package.json README.md LICENSE dist"
+    "copy": "cp -rf package.json README.md LICENSE dist",
+    "test": "jest"
   },
   "author": {
     "name": "Eric Yang",
@@ -35,13 +36,16 @@
     "sequelize": "^4.8.0"
   },
   "devDependencies": {
+    "@types/jest": "^21.1.8",
     "@types/sequelize": "^4.0.79",
     "babel-cli": "^6.24.1",
     "babel-core": "^6.23.1",
-    "babel-loader": "^7.1.2",
-    "babel-preset-es2015": "^6.22.0",
-    "babel-preset-stage-0": "^6.22.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
+    "jest": "^21.2.1",
+    "sequelize-mock": "^0.10.2",
+    "ts-jest": "^21.2.4",
     "ts-loader": "^3.2.0",
     "typescript": "^2.6.2",
     "webpack": "^3.10.0",
@@ -51,5 +55,17 @@
   },
   "dependencies": {
     "lodash.isequal": "^4.5.0"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ]
   }
 }

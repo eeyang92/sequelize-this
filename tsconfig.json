@@ -11,6 +11,6 @@
         ],
         "listFiles": true,
         "pretty": true
-        //"allowSyntheticDefaultImports": true
+        // "allowSyntheticDefaultImports": true
     }
 }
