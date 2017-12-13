@@ -41,34 +41,34 @@ Note: This package was created to assist me in my projects, as such the features
 - `options` is passed into `schema.define`
 - Known Issue: instance/class methods must be defined as a method, and not as a property on a class (as shown below)
 - Example:
-	```javascript
-	import Sequelize from 'sequelize'
-	import { classToSequelizeSchema, property } from 'sequelize-this'
-	import { hasMany } from 'sequelize-this/relationships'
+    ```javascript
+    import Sequelize from 'sequelize'
+    import { classToSequelizeSchema, property } from 'sequelize-this'
+    import { hasMany } from 'sequelize-this/relationships'
 
-	@hasMany('Comment')
-	class User {
-		@property({ type: Sequelize.STRING })
-		name
+    @hasMany('Comment')
+    class User {
+        @property({ type: Sequelize.STRING })
+        name
 
-		doSomethingWithUser() {
-			...
-		}
-	}
+        doSomethingWithUser() {
+            ...
+        }
+    }
 
-	export default classToSequelizeSchema(User)
-	```
+    export default classToSequelizeSchema(User)
+    ```
 - Note: Support for usage without decorators is no longer provided
 - Note: Instead of a method called `associate`, you can define a static method called `modifySchema`, since you can do anything to the schema object in this method. This is relevant if you wish to initialize Sequelize yourself, instead of using the provided `initializeSequelize` function
-	- Format of `modifySchema` method:
-		- ```javascript
-			static modifySchema(schema) {
-				return (sequelize) => {
-					schema.hasMany(sequelize.models.Comment)
-				}
-			}
-		```
-	- In fact, a method called `associate` is indeed created behind the scenes, but this may change in the future
+    - Format of `modifySchema` method:
+        - ```javascript
+            static modifySchema(schema) {
+                return (sequelize) => {
+                    schema.hasMany(sequelize.models.Comment)
+                }
+            }
+        ```
+    - In fact, a method called `associate` is indeed created behind the scenes, but this may change in the future
 
 ### `SqtOptions`
 - `nameOverride`: `string`
@@ -76,40 +76,40 @@ Note: This package was created to assist me in my projects, as such the features
 ### `initializeSequelize(sequelize: Sequelize, schemaDir: string, options: InitializeSequelizeOptions = {}): Promise<Sequelize.Sequelize>`
 - Allow support for custom filters for model files (TODO)
 - Will load all .js files in the defined schema directory (and subdirectories)
-	- Import strategy follows the guideline set in the Sequelize docs: [http://sequelize.readthedocs.io/en/1.7.0/articles/express/](http://sequelize.readthedocs.io/en/1.7.0/articles/express/)
+    - Import strategy follows the guideline set in the Sequelize docs: [http://sequelize.readthedocs.io/en/1.7.0/articles/express/](http://sequelize.readthedocs.io/en/1.7.0/articles/express/)
 - Will set an exportable singleton variable called `connection` that you can import from any file
 - Returns a promise once all schemas are loaded
 - Example:
-	```javascript
-	import express from 'express'
-	import Sequelize from 'sequelize'
-	import { initializeSequelize } from 'sequelize-this'
+    ```javascript
+    import express from 'express'
+    import Sequelize from 'sequelize'
+    import { initializeSequelize } from 'sequelize-this'
 
-	const app = express()
+    const app = express()
 
-	app.use('/', myRoutes)
+    app.use('/', myRoutes)
 
-	const port = process.env.PORT || 9000
+    const port = process.env.PORT || 9000
 
-	const sequelize = new Sequelize('dbname', 'user', 'password', {
-		host: 'localhost',
-		dialect: 'mysql',
-		pool: {
-			max: 10,
-			min: 0,
-			idle: 10000
-		},
-		logging: false
-	})
+    const sequelize = new Sequelize('dbname', 'user', 'password', {
+        host: 'localhost',
+        dialect: 'mysql',
+        pool: {
+            max: 10,
+            min: 0,
+            idle: 10000
+        },
+        logging: false
+    })
 
-	initializeSequelize(sequelize, __dirname + '/../common/mysql_schema')
-	.then(() => sequelize.sync())
-	.then(() => {
-		app.listen(port, () => {
-			console.log(`Server listening on port ${ port }!`)
-		})
-	})
-	```
+    initializeSequelize(sequelize, __dirname + '/../common/mysql_schema')
+    .then(() => sequelize.sync())
+    .then(() => {
+        app.listen(port, () => {
+            console.log(`Server listening on port ${ port }!`)
+        })
+    })
+    ```
 
 ### `InitializeSequelizeOptions`
 - `silent`: `boolean`
