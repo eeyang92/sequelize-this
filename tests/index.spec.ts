@@ -200,3 +200,7 @@ test('property adds and modifies _sqtMetadata on class with superclass', () => {
 
     expect(Test.prototype['_sqtMetadata']).toEqual(expectedSqtMetadata)
 })
+
+test('methods are attached to schema on class with superclass', () => {
+
+})

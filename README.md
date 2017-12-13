@@ -165,4 +165,4 @@ Version 3.1.0
 Version 3.0.0
 - Ported to TypeScript
 - Better documentation
-- Several breaking changed in API, including the way options are passed in
+- Several breaking changes in API, including the way options are passed in
