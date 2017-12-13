@@ -125,11 +125,8 @@ Note: This package was created to assist me in my projects, as such the features
 - Singleton variable holding the sequelize instance
 - Use this to retrieve the value synchronously if you know `connection` will be set by the time this variable is used
 
-### `property(options: PropertyOptions)`
+### `property(defineAttributes: Sequelize.DefineAttributes)`
 - Define a Sequelize property
-
-### `PropertyOptions`
-- `type`: `Sequelize.DataTypes` (Required)
 
 ### `relationships`
 
