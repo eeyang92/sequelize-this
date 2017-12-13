@@ -142,7 +142,7 @@ export function getConnection() {
 			return connection
 		})
 	} else {
-		throw Error('Sequlize connection was never initiated')
+		throw Error('Sequelize connection was never initiated')
 	}
 }
 
@@ -250,7 +250,9 @@ function getNonIntersectingElementsOnFirstArray(array1: Array<any>, array2: Arra
 	})
 }
 
-export function property(defineAttribute: Sequelize.DefineAttributes) {
+type DefineAttribute = string | Sequelize.DataTypeAbstract | Sequelize.DefineAttributeColumnOptions
+
+export function property(defineAttribute: DefineAttribute) {
 	if (!defineAttribute) {
 		throw Error('defineAttribute must be defined')
 	}
