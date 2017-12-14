@@ -1,9 +1,9 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as Sequelize from 'sequelize'
-import * as isEqual from 'lodash.isequal'
 
 import relationships, { setRelationship } from './relationships'
+import { getElementsInSecondArrayNotPresentInFirstArray } from './util'
 
 export { relationships }
 
@@ -236,22 +236,6 @@ export function initializeSequelize(sequelize: Sequelize.Sequelize, schemaDir: s
     })
 
     return connectionPromise
-}
-
-function getElementsInSecondArrayNotPresentInFirstArray(array1: Array<any>, array2: Array<any>) {
-    if (array2.length === 0) {
-        return []
-    }
-
-    if (array1.length === 0) {
-        return array2.slice()
-    }
-
-    return array2.filter((element2) => {
-        return array1.some((element1) => {
-            return !isEqual(element2, element1)
-        })
-    })
 }
 
 type DefineAttribute = string | Sequelize.DataTypeAbstract | Sequelize.DefineAttributeColumnOptions

@@ -17,7 +17,7 @@
     "clear-dist": "rm -rf dist/*",
     "build": "npm run clear-dist; npm run copy; NODE_ENV=production node -r babel-register node_modules/.bin/webpack --config webpack.config.prod.module.js -p --progress --profile --colors",
     "copy": "cp -rf package.json README.md LICENSE dist",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "author": {
     "name": "Eric Yang",
