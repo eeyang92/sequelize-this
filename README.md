@@ -142,7 +142,7 @@ Note: This package was created to assist me in my projects, as such the features
 - Valid types: `'hasOne', 'hasMany', 'belongsTo', 'belongsToMany'`
 - `options` is passed directly to Seqeulize (for associations)
 
-### `hasOne(targetClass: string, options: Sequelize.AssociationOptions)`
+### `hasOne(targetClass: string, options: Sequelize.AssociationOptions, overrideOptions)`
 - Wrapper for `relationship('hasOne', targetClass, options)`
 
 ### `hasMany(targetClass: string, options: Sequelize.AssociationOptions)`
@@ -153,6 +153,16 @@ Note: This package was created to assist me in my projects, as such the features
 
 ### `belongsToMany(targetClass: string, options: Sequelize.AssociationOptions)`
 - Wrapper for `relationship('belongsToMany', targetClass, options)`
+
+**EXPERIMENTAL**
+```
+OverrideOptions: {
+    [keyFromAssociationOptions: string] : (schema) => any
+}
+```
+- Note: This is exactly the same as Sequelize.AssociationOptions except you can define a function that is called after the schema is initialized, in case you need to use schema-specific information (perhaps to modify the relationship name due to foreign key conflicts?)
+- Pass this in as the 4th argument for `relationship` or 3rd argument for any of the wrapper functions
+
 
 ## Changes
 

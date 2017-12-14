@@ -88,7 +88,7 @@ function extractPropsFromClassDefinition(obj) {
 
         if (obj._sqtMetadata) {
             if (obj._sqtMetadata.relationships) {
-                getNonIntersectingElementsOnFirstArray(obj._sqtMetadata.relationships, props.relationships)
+                getElementsInSecondArrayNotPresentInFirstArray(props.relationships, obj._sqtMetadata.relationships)
                 .forEach((relationship) => {
                     props.relationships.push(relationship)
                 })
@@ -238,13 +238,17 @@ export function initializeSequelize(sequelize: Sequelize.Sequelize, schemaDir: s
     return connectionPromise
 }
 
-function getNonIntersectingElementsOnFirstArray(array1: Array<any>, array2: Array<any>) {
-    return array1.filter((element1) => {
-        if (array2.length === 0) {
-            return true
-        }
+function getElementsInSecondArrayNotPresentInFirstArray(array1: Array<any>, array2: Array<any>) {
+    if (array2.length === 0) {
+        return []
+    }
 
-        return array2.some((element2) => {
+    if (array1.length === 0) {
+        return array2.slice()
+    }
+
+    return array2.filter((element2) => {
+        return array1.some((element1) => {
             return !isEqual(element2, element1)
         })
     })
