@@ -53,7 +53,7 @@ Note: This package was created to assist me in my projects, as such the features
             defaultValue: Sequelize.UUIDV4,
             allowNull: false
         })
-        private id: number
+        id
     }
 
     @hasMany('Comment')
