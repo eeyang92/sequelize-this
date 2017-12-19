@@ -46,8 +46,18 @@ Note: This package was created to assist me in my projects, as such the features
     import { classToSequelizeSchema, property } from 'sequelize-this'
     import { hasMany } from 'sequelize-this/relationships'
 
+    class Base {
+        @property({
+            type: Sequelize.UUID,
+            primaryKey: true,
+            defaultValue: Sequelize.UUIDV4,
+            allowNull: false
+        })
+        private id: number
+    }
+
     @hasMany('Comment')
-    class User {
+    class User extends Base {
         @property({ type: Sequelize.STRING })
         name
 
@@ -58,10 +68,13 @@ Note: This package was created to assist me in my projects, as such the features
 
     export default classToSequelizeSchema(User)
     ```
+- Note: User will have the property `id` via inheritance
+    - All relationships and properties are inherited
+    - (WIP) Custom logic to find subclasses if performing a `find()` or `findAll()` on a superclass
 - Note: Support for usage without decorators is no longer provided
-- Note: Instead of a method called `associate`, you can define a static method called `modifySchema`, since you can do anything to the schema object in this method. This is relevant if you wish to initialize Sequelize yourself, instead of using the provided `initializeSequelize` function
+- Instead of a method called `associate`, you can define a static method called `modifySchema`, since you can do anything to the schema object in this method. This is relevant if you wish to initialize Sequelize yourself, instead of using the provided `initializeSequelize` function
     - Format of `modifySchema` method:
-        - ```javascript
+        ```javascript
             static modifySchema(schema) {
                 return (sequelize) => {
                     schema.hasMany(sequelize.models.Comment)
