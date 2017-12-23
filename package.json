@@ -1,6 +1,6 @@
 {
   "name": "sequelize-this",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Enables schema definition via JavaScript Classes among other utility functions",
   "main": "index.js",
   "repository": {
