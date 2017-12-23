@@ -85,7 +85,6 @@ function extractPropsFromClassDefinition(obj) {
             }
         }
 
-
         if (obj._sqtMetadata) {
             if (obj._sqtMetadata.relationships) {
                 getElementsInSecondArrayNotPresentInFirstArray(props.relationships, obj._sqtMetadata.relationships)
@@ -126,6 +125,15 @@ export function classToSequelizeSchema(classDefinition: Object['constructor'], o
         if (classDefinition['modifySchema']) {
             schema['modifySchema'] = classDefinition['modifySchema'](schema)
         }
+
+        if (!schema['prototype']) {
+            schema['prototype'] = {}
+        }
+
+        Object.assign(schema['prototype'], props.methods)
+        Object.assign(schema, props.staticMethods)
+
+        // console.dir(schema)
 
         return schema
     }
